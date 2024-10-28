@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>soundcloud-playlist-randomizer</title>
+
+    <meta content="soundcloud-playlist-randomizer.hawolt.com" property="og:title">
+    <meta content="SoundCloud Playlist Randomizer" property="og:description">
+    <meta content="https://d21buns5ku92am.cloudfront.net/26628/images/419676-sc-logo-horizontal-20h-black-46e717-medium-1645807039.png"
+          property="og:image">
+    <meta content="#FFFFFF" data-react-helmet="true" name="theme-color">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@hawolt">
+    <meta name="twitter:creator" content="@hawolt">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+<span>Link to Playlist</span>
+<div>
+    <div id="sources" class="flex vertical">
+        <input class="source" type="text" placeholder="link">
+    </div>
+    <div class="flex">
+        <button id="add">Add another Playlist</button>
+        <button id="load">Load</button>
+        <button id="next">Next</button>
+    </div>
+    <input type="range" id="volume-control" min="0" max="100" value="40" step="1">
+    <div id="queue">
+
+    </div>
+
+    <iframe id="embed" width="350px" allow="autoplay" src="https://w.soundcloud.com/player/?url="></iframe>
+    <script src="https://w.soundcloud.com/player/api.js" defer></script>
+</div>
+<script src="./bundle.js"></script>
+</body>
+
+</html>
