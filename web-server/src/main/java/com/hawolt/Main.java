@@ -18,6 +18,4 @@ public class Main {
                 .get("/status/{id}", SoundcloudHandler.LOAD_STATUS_HANDLER)
                 .start(13999);
     }
-    https://soundcloud.com/hawolt/sets/test1/s-zEAXlICO3Rg?si=7fbf421006a648c882ec8b06d2576c9e&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing
-    https://soundcloud.com/hawolt/sets/test2-2/s-Jti83VGdNlu?si=a8b08479c86e4ae7a2fa6d19a5df3c9c&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing
 }
