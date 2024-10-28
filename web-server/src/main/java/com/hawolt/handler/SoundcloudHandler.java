@@ -18,13 +18,15 @@ import org.json.JSONObject;
 import java.util.*;
 
 public class SoundcloudHandler {
-    private static final Map<String, HashSet<Long>> RESULT_MAP = new HashMap<>();
+    private static final Map<String, List<Long>> RESULT_MAP = new HashMap<>();
     private static final BundleTracker BUNDLE_TRACKER = new BundleTracker();
     private static final Object lock = new Object();
 
     private static final PlaylistCallback REFERENCE = (id, playlist) -> {
         synchronized (lock) {
-            RESULT_MAP.put(id, playlist);
+            List<Long> shuffled = new ArrayList<>(playlist);
+            Collections.shuffle(shuffled);
+            RESULT_MAP.put(id, shuffled);
         }
     };
 
@@ -32,10 +34,6 @@ public class SoundcloudHandler {
         ObjectCallback<Playlist> playlistObjectCallback =
                 (source, playlist, arguments) -> BUNDLE_TRACKER.loaded(source, playlist);
         Soundcloud.register(Playlist.class, new PlaylistManager(playlistObjectCallback));
-        ObjectCallback<Track> trackObjectCallback = (source, track, arguments) -> {
-
-        };
-        Soundcloud.register(Track.class, new TrackManager(trackObjectCallback));
     }
 
 
@@ -65,7 +63,7 @@ public class SoundcloudHandler {
             String id = ctx.pathParam("id");
             if (RESULT_MAP.containsKey(id)) {
                 JSONArray response = new JSONArray();
-                HashSet<Long> set = RESULT_MAP.get(id);
+                List<Long> set = RESULT_MAP.get(id);
                 for (Long trackId : set) {
                     response.put(trackId);
                 }
