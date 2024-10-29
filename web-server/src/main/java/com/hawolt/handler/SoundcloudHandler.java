@@ -89,6 +89,7 @@ public class SoundcloudHandler {
             track.put("artwork", reference.getArtwork());
             track.put("duration", reference.getFullDuration());
             track.put("artist", reference.getUser().getUsername());
+            track.put("waveform", reference.getWaveformURL());
             track.put("pro", reference.isPro());
             ctx.result(track.toString());
         }
