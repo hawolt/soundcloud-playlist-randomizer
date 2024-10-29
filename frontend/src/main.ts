@@ -1,8 +1,9 @@
-var cache: string[] = [];
-
 let widget: SCWidget;
+let queue: string[] = [];
+let queueIndex: number = -1;
 
 document.addEventListener('DOMContentLoaded', () => {
+
     document.getElementById('add')?.addEventListener('click', addSourceInput)
     document.getElementById('load')?.addEventListener('click', request)
     document.getElementById('next')?.addEventListener('click', next)
@@ -15,9 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const iframe = document.getElementById('embed');
     if (iframe == undefined) return
     widget = window.SC.Widget(iframe);
+    widget.bind("ready", resume);
     widget.bind("finish", next);
     widget.bind("play", volume);
 });
+
+function resume() {
+    metadata(queue[queueIndex]);
+    volume();
+    widget.play();
+}
 
 function volume() {
     const scaleVolume = (linearValue: number): number => {
@@ -28,8 +36,6 @@ function volume() {
     const linearVolume = Number(volumeControl.value);
     const scaledVolume = scaleVolume(linearVolume);
     widget.setVolume(scaledVolume);
-
-    console.log("vol: "+scaledVolume)
 }
 
 function addSourceInput() {
@@ -79,17 +85,49 @@ function load(id: string) {
         .then(response => response.json())
         .then(json => {
             for (let i = 0; i < json.length; i++) {
-                cache.push(json[i]);
+                queue.push(json[i]);
             }
             next();
         });
 }
 
+function getNextTrackId(): string | null {
+    if (queue.length == 0) return null;
+    queueIndex = (queueIndex + 1) % queue.length;
+    return queue[queueIndex];
+}
+
 function next() {
-    if (cache.length == 0) return
-    const id = cache.pop();
-    widget.load("https://api.soundcloud.com/tracks/" + id, {
-        auto_play: true
-    });
-    widget.play();
+    let id = getNextTrackId();
+    if (id == null) return;
+    widget.load("https://api.soundcloud.com/tracks/" + id);
+    widget.bind("ready", resume);
+    resume();
+}
+
+function metadata(id: string) {
+    const uri = 'https://soundcloud-playlist-randomizer.hawolt.com/api/track/' + id;
+    fetch(uri, {
+        method: "POST"
+    })
+        .then(response => response.json())
+        .then(json => {
+            seek(json['waveform'], json['duration'])
+        });
+}
+
+function seek(uri: string, duration: string) {
+    fetch(uri)
+        .then(response => response.json())
+        .then(json => {
+            let ms = parseFloat(duration) / 1800;
+            let blanks = 0;
+            let samples = json['samples'];
+            for (let i = 0; i < samples.length; i++, blanks++) {
+                if (samples[i] != 0) break
+            }
+            if (blanks == 0) return
+            let total = Math.floor(ms * (blanks - 1));
+            widget.seekTo(total)
+        });
 }
