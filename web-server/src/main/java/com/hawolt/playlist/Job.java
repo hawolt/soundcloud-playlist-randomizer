@@ -2,14 +2,11 @@ package com.hawolt.playlist;
 
 import com.hawolt.data.media.hydratable.impl.playlist.Playlist;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Job {
 
-    private final Map<String, List<List<Long>>> cache = new HashMap<>();
+    private final Map<String, List<List<Long>>> cache = new LinkedHashMap<>();
     private final PlaylistCallback callback;
     private final String[] playlists;
 

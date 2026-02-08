@@ -1,15 +1,14 @@
 package com.hawolt.playlist;
 
-import com.hawolt.Soundcloud;
+import com.hawolt.SoundcloudInternal;
 import com.hawolt.data.media.hydratable.impl.playlist.Playlist;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class BundleTracker {
     private static final Object lock = new Object();
-    private final Map<String, Job> callbacks = new HashMap<>();
-    private final Map<String, List<String>> groups = new HashMap<>();
+    private final Map<String, Job> callbacks = new LinkedHashMap<>();
+    private final Map<String, List<String>> groups = new LinkedHashMap<>();
 
     public String load(PlaylistCallback callback, String... playlists) {
         String id = UUID.randomUUID().toString();
@@ -20,7 +19,7 @@ public class BundleTracker {
             list.addAll(Arrays.asList(playlists));
         }
         for (String playlist : playlists) {
-            Soundcloud.load(playlist);
+            SoundcloudInternal.load(playlist);
         }
         return id;
     }
@@ -30,21 +29,34 @@ public class BundleTracker {
             for (Job job : callbacks.values()) {
                 job.loaded(source, playlist);
             }
-            for (String id : groups.keySet()) {
+            Iterator<String> it = groups.keySet().iterator();
+            while (it.hasNext()) {
+                String id = it.next();
                 Job job = callbacks.get(id);
                 List<String> playlists = groups.get(id);
                 Map<String, List<List<Long>>> cache = job.getCache();
                 int count = 0;
                 for (String loaded : cache.keySet()) {
                     for (String required : playlists) {
-                        if (required.contains(loaded)) count++;
+                        if (required.equals(loaded)) count++;
                     }
                 }
                 if (count != playlists.size()) continue;
-                Stream<Long> stream = cache.values().stream().flatMap(List::stream).flatMap(List::stream);
-                callbacks.get(id).getCallback().onPlaylist(id, new HashSet<>(stream.toList()));
+
+                List<Long> ordered = new ArrayList<>();
+
+                for (String playlistId : playlists) {
+                    List<List<Long>> lists = cache.get(playlistId);
+                    if (lists == null) continue;
+
+                    for (List<Long> list : lists) {
+                        ordered.addAll(list);
+                    }
+                }
+
+                job.getCallback().onPlaylist(id, ordered);
                 callbacks.remove(id);
-                groups.remove(id);
+                it.remove();
             }
         }
     }

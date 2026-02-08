@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>soundcloud-api</artifactId>
-            <version>c3d301fef1</version>
+            <version>cb37d3db26</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt.custom-core</groupId>

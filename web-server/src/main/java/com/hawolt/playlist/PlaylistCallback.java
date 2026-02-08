@@ -1,7 +1,7 @@
 package com.hawolt.playlist;
 
-import java.util.HashSet;
+import java.util.List;
 
 public interface PlaylistCallback {
-    void onPlaylist(String id, HashSet<Long> tracks);
+    void onPlaylist(String id, List<Long> tracks);
 }

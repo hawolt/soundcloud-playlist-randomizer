@@ -1,11 +1,10 @@
 package com.hawolt.handler;
 
-import com.hawolt.Soundcloud;
+import com.hawolt.SoundcloudInternal;
 import com.hawolt.data.media.ObjectCallback;
 import com.hawolt.data.media.hydratable.impl.playlist.Playlist;
 import com.hawolt.data.media.hydratable.impl.playlist.PlaylistManager;
 import com.hawolt.data.media.hydratable.impl.track.Track;
-import com.hawolt.data.media.hydratable.impl.track.TrackManager;
 import com.hawolt.data.media.search.Explorer;
 import com.hawolt.data.media.search.query.CompleteObjectCollection;
 import com.hawolt.data.media.search.query.impl.TrackQuery;
@@ -18,22 +17,20 @@ import org.json.JSONObject;
 import java.util.*;
 
 public class SoundcloudHandler {
-    private static final Map<String, List<Long>> RESULT_MAP = new HashMap<>();
     private static final BundleTracker BUNDLE_TRACKER = new BundleTracker();
+    private static final Map<String, List<Long>> RESULT_MAP = new HashMap<>();
     private static final Object lock = new Object();
 
     private static final PlaylistCallback REFERENCE = (id, playlist) -> {
         synchronized (lock) {
-            List<Long> shuffled = new ArrayList<>(playlist);
-            Collections.shuffle(shuffled);
-            RESULT_MAP.put(id, shuffled);
+            RESULT_MAP.put(id, playlist);
         }
     };
 
     static {
         ObjectCallback<Playlist> playlistObjectCallback =
                 (source, playlist, arguments) -> BUNDLE_TRACKER.loaded(source, playlist);
-        Soundcloud.register(Playlist.class, new PlaylistManager(playlistObjectCallback));
+        SoundcloudInternal.register(Playlist.class, new PlaylistManager(playlistObjectCallback));
     }
 
 
@@ -61,9 +58,14 @@ public class SoundcloudHandler {
     public static final Handler FETCH_HANDLER = ctx -> {
         synchronized (lock) {
             String id = ctx.pathParam("id");
+            String query = ctx.queryParam("shuffle");
+            boolean shuffle = "1".equals(query);
             if (RESULT_MAP.containsKey(id)) {
                 JSONArray response = new JSONArray();
                 List<Long> set = RESULT_MAP.get(id);
+                if (shuffle) {
+                    Collections.shuffle(set);
+                }
                 for (Long trackId : set) {
                     response.put(trackId);
                 }

@@ -4,11 +4,9 @@ import com.hawolt.handler.CORSHandler;
 import com.hawolt.handler.SoundcloudHandler;
 import io.javalin.Javalin;
 
-import java.io.IOException;
-
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Javalin.create()
                 .before("*", CORSHandler.ACCESS_CONTROL_HANDLER)
                 .options("*", CORSHandler.OPTIONS_HANDLER)
